@@ -1,6 +1,7 @@
 package com.project.springadventure.appUser;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,11 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/app-users")
@@ -27,47 +26,104 @@ public class AppUserController {
   }
 
   @PostMapping
-  @Operation(summary = "Create a new App User", description = "Creates a new App User with the provided details and auto-generated ID.")
-  @ApiResponses(
-      value = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "App User created successfully",
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(implementation = AppUser.class),
-                  examples = @ExampleObject(
-                      value = """
-                          {
-                              "id": 10000,
-                              "email": "appuser@example.com",
-                              "type": "USER"
-                          }
-                          """
-                  )
-              )
-          ),
-          @ApiResponse(
-              responseCode = "400",
-              description = "Invalid input data",
-              content = @Content(
-                  mediaType = "application/json",
-                  examples = @ExampleObject(
-                      value = """
-                          {
-                              "email": "Invalid email format",
-                              "type": "Invalid user type. Allowed values are 'USER', 'ADMIN'."
-                          }
-                          """
-                  )
-              )
+  @Operation(summary = "Create a new App User", description = "Creates a new App User with the provided details and auto-generated ID starting from 10000.")
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "App User created successfully",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = AppUser.class),
+              examples = @ExampleObject(value = """
+                  {
+                      "id": 10000,
+                      "email": "appuser@example.com",
+                      "type": "USER"
+                  }
+                  """)
           )
-      }
-  )
+      ),
+      @ApiResponse(
+          responseCode = "400",
+          description = "Invalid input data",
+          content = @Content(
+              mediaType = "application/json",
+              examples = @ExampleObject(value = """
+                  {
+                      "email": ["Email is required.", "Invalid email format."],
+                      "type": ["Type is required.", "Invalid user type. Allowed values are 'USER', 'ADMIN'."]
+                  }
+                  """)
+          )
+      )
+  })
   public ResponseEntity<AppUser> createAppUser(@Valid @RequestBody AppUserDTO appUserDto) {
     AppUser appUser = new AppUser();
     appUser.setEmail(appUserDto.getEmail());
     appUser.setType(appUserDto.getType());
     return ResponseEntity.ok(appUserService.createAppUser(appUser));
+  }
+
+  @GetMapping
+  @Operation(summary = "Get all App Users", description = "Retrieves a list of all App Users.")
+  @ApiResponse(
+      responseCode = "200",
+      description = "List of App Users",
+      content = @Content(
+          mediaType = "application/json",
+          schema = @Schema(implementation = AppUser.class),
+          examples = @ExampleObject(value = """
+              [
+                  {
+                      "id": 10000,
+                      "email": "appuser1@example.com",
+                      "type": "USER"
+                  },
+                  {
+                      "id": 10001,
+                      "email": "appuser2@example.com",
+                      "type": "ADMIN"
+                  }
+              ]
+              """)
+      )
+  )
+  public ResponseEntity<List<AppUser>> getAllAppUsers() {
+    return ResponseEntity.ok(appUserService.getAllAppUsers());
+  }
+
+  @GetMapping("/{id}")
+  @Operation(summary = "Get App User by ID", description = "Retrieves an App User by their ID.")
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "App User found",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = AppUser.class),
+              examples = @ExampleObject(value = """
+                  {
+                      "id": 10000,
+                      "email": "appuser@example.com",
+                      "type": "USER"
+                  }
+                  """)
+          )
+      ),
+      @ApiResponse(
+          responseCode = "404",
+          description = "App User not found",
+          content = @Content
+      )
+  })
+  public ResponseEntity<AppUser> getAppUserById(
+      @Parameter(description = "ID of the App User to retrieve", example = "10000")
+      @PathVariable Long id
+  ) {
+    AppUser appUser = appUserService.getAppUserById(id);
+    if (appUser == null) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok(appUser);
   }
 }
