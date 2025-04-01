@@ -26,7 +26,19 @@ public class AppUserController {
   }
 
   @PostMapping
-  @Operation(summary = "Create a new App User", description = "Creates a new App User with the provided details and auto-generated ID starting from 10000.")
+  @Operation(summary = "Create a new App User", description = """
+      Creates a new App User with the provided details and auto-generated ID starting from 10000.
+      
+      Curl example:
+      ```bash
+      curl -X POST http://localhost:8080/api/v1/app-users \\
+        -H 'Content-Type: application/json' \\
+        -d '{
+          "email": "appuser@example.com",
+          "type": "USER"
+        }'
+      ```
+      """)
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
@@ -65,7 +77,14 @@ public class AppUserController {
   }
 
   @GetMapping
-  @Operation(summary = "Get all App Users", description = "Retrieves a list of all App Users.")
+  @Operation(summary = "Get all App Users", description = """
+      Retrieves a list of all App Users.
+      
+      Curl example:
+      ```bash
+      curl http://localhost:8080/api/v1/app-users
+      ```
+      """)
   @ApiResponse(
       responseCode = "200",
       description = "List of App Users",
@@ -93,7 +112,14 @@ public class AppUserController {
   }
 
   @GetMapping("/{id}")
-  @Operation(summary = "Get App User by ID", description = "Retrieves an App User by their ID.")
+  @Operation(summary = "Get App User by ID", description = """
+      Retrieves an App User by their ID.
+      
+      Curl example:
+      ```bash
+      curl http://localhost:8080/api/v1/app-users/10000
+      ```
+      """)
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
@@ -125,5 +151,44 @@ public class AppUserController {
       return ResponseEntity.notFound().build();
     }
     return ResponseEntity.ok(appUser);
+  }
+
+  @GetMapping("/user")
+  @Operation(summary = "Get App Users by type", description = """
+      Retrieves App Users filtered by type (optional).
+      
+      Curl examples:
+      ```bash
+      # Get users with type filter
+      curl 'http://localhost:8080/api/v1/app-users/user?type-filter=USER'
+      
+      # Get all users (no filter)
+      curl http://localhost:8080/api/v1/app-users/user
+      ```
+      """)
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "List of filtered App Users",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = AppUser.class),
+              examples = @ExampleObject(value = """
+                  [
+                      {
+                          "id": 10000,
+                          "email": "user@example.com",
+                          "type": "USER"
+                      }
+                  ]
+                  """)
+          )
+      )
+  })
+  public ResponseEntity<List<AppUser>> getAppUsersByType(
+      @Parameter(description = "Filter users by type (USER or ADMIN)")
+      @RequestParam(required = false, name = "type-filter") String type
+  ) {
+    return ResponseEntity.ok(appUserService.getAppUsersByType(type));
   }
 }

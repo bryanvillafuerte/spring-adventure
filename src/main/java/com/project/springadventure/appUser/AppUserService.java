@@ -25,4 +25,11 @@ public class AppUserService {
     return appUserRepository.findById(id).orElse(null);
   }
 
+  public List<AppUser> getAppUsersByType(String type) {
+    if (type == null || type.isEmpty()) {
+      return appUserRepository.findAll();
+    }
+    return appUserRepository.findByType(type.toUpperCase());
+  }
+
 }
