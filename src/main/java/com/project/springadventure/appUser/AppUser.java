@@ -1,10 +1,7 @@
 package com.project.springadventure.appUser;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 
 @Entity
 public class AppUser {
@@ -24,12 +21,12 @@ public class AppUser {
   @Email(message = "Invalid email format.")
   private String email;
 
-  @NotEmpty(message = "Type is required.")
-  @NotBlank(message = "Type is required")
-  @Pattern(regexp = "^(USER|ADMIN)$", message = "Invalid user type. Allowed values are 'USER', 'ADMIN'.")
-  private String type;
+  @NotNull(message = "Type is required")
+  @Enumerated(EnumType.STRING)
+  private AppUserType type;
 
-  public AppUser(String email, String type) {
+  public AppUser(Long id, String email, AppUserType type) {
+    this.id = id;
     this.email = email;
     this.type = type;
   }
@@ -53,20 +50,20 @@ public class AppUser {
     this.email = email;
   }
 
-  public String getType() {
+  public AppUserType getType() {
     return type;
   }
 
-  public void setType(String type) {
+  public void setType(AppUserType type) {
     this.type = type;
   }
 
   @Override
   public String toString() {
-    return "appUser{" +
+    return "AppUser{" +
         "id=" + id +
         ", email='" + email + '\'' +
-        ", type='" + type + '\'' +
+        ", type=" + type +
         '}';
   }
 }

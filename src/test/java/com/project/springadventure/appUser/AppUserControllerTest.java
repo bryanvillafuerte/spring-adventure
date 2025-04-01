@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AppUserController.class)
 class AppUserControllerTest {
-
   @Autowired
   private MockMvc mockMvc;
 
@@ -35,9 +34,11 @@ class AppUserControllerTest {
   void createAppUser_ValidInput_ReturnsCreatedUser() throws Exception {
     AppUserDTO dto = new AppUserDTO();
     dto.setEmail("test@example.com");
-    dto.setType("USER");
+    dto.setType(AppUserType.USER);
 
-    AppUser appUser = new AppUser("test@example.com", "USER");
+    AppUser appUser = new AppUser();
+    appUser.setEmail("test@example.com");
+    appUser.setType(AppUserType.USER);
     appUser.setId(10000L);
 
     when(appUserService.createAppUser(any(AppUser.class))).thenReturn(appUser);
@@ -55,7 +56,7 @@ class AppUserControllerTest {
   void createAppUser_InvalidInput_ReturnsBadRequest() throws Exception {
     AppUserDTO dto = new AppUserDTO();
     dto.setEmail("invalid-email");
-    dto.setType("INVALID");
+    dto.setType(AppUserType.USER); // Changed from "INVALID"
 
     mockMvc.perform(post("/api/v1/app-users")
             .contentType(MediaType.APPLICATION_JSON)
@@ -65,10 +66,15 @@ class AppUserControllerTest {
 
   @Test
   void getAllAppUsers_ReturnsPagedUsers() throws Exception {
-    List<AppUser> users = List.of(
-        new AppUser("user1@example.com", "USER"),
-        new AppUser("user2@example.com", "ADMIN")
-    );
+    AppUser user1 = new AppUser();
+    user1.setEmail("user1@example.com");
+    user1.setType(AppUserType.USER);
+
+    AppUser user2 = new AppUser();
+    user2.setEmail("user2@example.com");
+    user2.setType(AppUserType.ADMIN);
+
+    List<AppUser> users = List.of(user1, user2);
     when(appUserService.getAllAppUsers(any(PageRequest.class)))
         .thenReturn(new PageImpl<>(users));
 
@@ -80,7 +86,9 @@ class AppUserControllerTest {
 
   @Test
   void getAppUserById_ExistingId_ReturnsUser() throws Exception {
-    AppUser appUser = new AppUser("test@example.com", "USER");
+    AppUser appUser = new AppUser();
+    appUser.setEmail("test@example.com");
+    appUser.setType(AppUserType.USER);
     appUser.setId(10000L);
 
     when(appUserService.getAppUserById(10000L)).thenReturn(appUser);
@@ -93,10 +101,15 @@ class AppUserControllerTest {
 
   @Test
   void getAppUsersByType_ValidType_ReturnsFilteredUsers() throws Exception {
-    List<AppUser> users = List.of(
-        new AppUser("user1@example.com", "USER"),
-        new AppUser("user2@example.com", "USER")
-    );
+    AppUser user1 = new AppUser();
+    user1.setEmail("user1@example.com");
+    user1.setType(AppUserType.USER);
+
+    AppUser user2 = new AppUser();
+    user2.setEmail("user2@example.com");
+    user2.setType(AppUserType.USER);
+
+    List<AppUser> users = List.of(user1, user2);
     when(appUserService.getAppUsersByType("USER")).thenReturn(users);
 
     mockMvc.perform(get("/api/v1/app-users/user")
@@ -105,5 +118,4 @@ class AppUserControllerTest {
         .andExpect(jsonPath("$.length()").value(2))
         .andExpect(jsonPath("$[0].type").value("USER"));
   }
-
 }

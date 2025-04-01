@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
-  List<AppUser> findByType(String type);
+  List<AppUser> findByType(AppUserType type);
 }

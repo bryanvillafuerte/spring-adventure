@@ -1,8 +1,10 @@
 package com.project.springadventure.appUser;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 
 public class AppUserDTO {
 
@@ -10,9 +12,9 @@ public class AppUserDTO {
   @Email(message = "Email should be valid")
   private String email;
 
-  @NotBlank(message = "Type is required")
-  @Pattern(regexp = "^(USER|ADMIN)$", message = "Type must be either 'USER' or 'ADMIN'")
-  private String type;
+  @NotNull(message = "Type is required")
+  @Enumerated(EnumType.STRING)
+  private AppUserType type;
 
   public String getEmail() {
     return email;
@@ -22,11 +24,11 @@ public class AppUserDTO {
     this.email = email;
   }
 
-  public String getType() {
+  public AppUserType getType() {
     return type;
   }
 
-  public void setType(String type) {
+  public void setType(AppUserType type) {
     this.type = type;
   }
 }

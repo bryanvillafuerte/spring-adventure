@@ -57,7 +57,12 @@ public class AppUserService {
     if (type == null || type.isEmpty()) {
       return appUserRepository.findAll();
     }
-    return appUserRepository.findByType(type.toUpperCase());
+    try {
+      AppUserType userType = AppUserType.valueOf(type.toUpperCase());
+      return appUserRepository.findByType(userType);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException("Invalid user type: " + type);
+    }
   }
 
 }

@@ -203,6 +203,8 @@ public class AppUserController {
   @Operation(summary = "Get App Users by type", description = """
       Retrieves App Users filtered by type (optional).
       
+      Valid types: USER, ADMIN
+      
       Curl examples:
       ```bash
       # Get users with type filter
