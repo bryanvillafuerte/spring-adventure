@@ -1,9 +1,10 @@
-# Spring Adventure API
+# KLP Technology API
 
-REST API for managing app users with Spring Boot. This application provides endpoints for creating and retrieving user data with validation and documentation.
+REST API for managing app users and retrieving Norwegian county information with Spring Boot. This application provides endpoints for user management and county data retrieval with validation and documentation.
 
 ## Features
 - CRUD operations for app users
+- Norwegian county information retrieval
 - Input validation with error messages
 - OpenAPI/Swagger documentation
 - H2 in-memory database
@@ -32,30 +33,50 @@ REST API for managing app users with Spring Boot. This application provides endp
 
 ## API Endpoints
 
-### Create User
-```bash
-POST /api/v1/app-users
-Content-Type: application/json
+### App Users
 
-{
+#### Create User
+```bash
+curl -X POST http://localhost:8080/api/v1/app-users \
+  -H 'Content-Type: application/json' \
+  -d '{
     "email": "user@example.com",
     "type": "USER"
-}
+  }'
 ```
 
-### Get All Users (Paginated)
+#### Get All Users (Paginated)
 ```bash
-GET /api/v1/app-users?page=0&size=10
+# Get first page with default size (10 items)
+curl http://localhost:8080/api/v1/app-users
+
+# Get second page with 5 items
+curl 'http://localhost:8080/api/v1/app-users?page=1&size=5'
 ```
 
-### Get User by ID
+#### Get User by ID
 ```bash
-GET /api/v1/app-users/{id}
+curl http://localhost:8080/api/v1/app-users/10000
 ```
 
-### Filter Users by Type
+#### Filter Users by Type
 ```bash
-GET /api/v1/app-users/user?type-filter=USER
+# Get users with type filter
+curl 'http://localhost:8080/api/v1/app-users/user?type-filter=USER'
+
+# Get all users (no filter)
+curl http://localhost:8080/api/v1/app-users/user
+```
+
+### County Information
+
+#### Get County by county number
+```bash
+# Get Oslo county
+curl http://localhost:8080/county/03
+
+# Get Vestland county
+curl http://localhost:8080/county/46
 ```
 
 ## Sample Data
@@ -67,5 +88,9 @@ The application initializes with 5 sample users:
 - charlie.davis@example.com (USER)
 
 ## Validation Rules
+### App Users
 - Email: Required, must be valid email format
 - Type: Required, must be either "USER" or "ADMIN"
+
+### County
+- County Number: Must be a valid Norwegian county number (e.g., "03" for Oslo)
